@@ -1,0 +1,42 @@
+import serial
+import csv
+import time
+from datetime import datetime
+SERIAL_PORT = 'COM3'
+BAUD_RATE = 115200
+OUTPUT_FILENAME = f"road_profile_log_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+def main():
+    print(f"Connecting to ESP32 on {SERIAL_PORT} at {BAUD_RATE} baud...")
+    try:
+        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=2)
+        time.sleep(2)  
+        ser.reset_input_buffer()
+    except serial.SerialException as e:
+        print(f"Error opening serial port: {e}")
+        return
+
+    print(f"Logging data to {OUTPUT_FILENAME}. Press Ctrl+C to stop.\n")
+
+    with open(OUTPUT_FILENAME, mode='w', newline='', encoding='utf-8') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        header = ["timestamp_ms", "raw_mv", "filtered_mv", "baseline_mv","delta_mv", "roughness_sd_mv", "profile_class", "advisory_speed_kmh"]
+        csv_writer.writerow(header)
+
+        try:
+            while True:
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
+                if not line or line.startswith("timestamp_ms"):
+                    continue
+                
+                row = line.split(',')
+                if len(row) == 8:
+                    csv_writer.writerow(row)
+                    csv_file.flush()
+                    print(f"[{row[0]} ms] V_filt: {row[2]} mV | Delta: {row[4]} mV | "f"Roughness: {row[5]} mV | State: {row[6]} ({row[7]} km/h)")
+        except KeyboardInterrupt:
+            print(f"\nData collection complete. File saved: {OUTPUT_FILENAME}")
+        finally:
+            ser.close()
+
+if __name__ == "__main__":
+    main()
