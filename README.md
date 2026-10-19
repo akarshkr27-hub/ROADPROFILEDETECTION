@@ -132,19 +132,7 @@ python software/serial_to_csv.py
 
 3. Move the sensor module along the miniature track. Press `Ctrl+C` to finish logging and save the timestamped `.csv` file.
 
-### 3. View or Export 3D CAD Files
 
-* **Browser Viewer & `.STL` Export:** Double-click `hardware/cad/road_profile_cad.html` in any browser to inspect the 3D assembly and click **Download .STL CAD File**.
-* **Native `.STEP` Export for SolidWorks / Fusion 360:**
-```bash
-pip install cadquery
-python hardware/cad/export_step.py
-
-```
-
-
-
----
 
 ## Sample CSV Output
 
